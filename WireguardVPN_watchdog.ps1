@@ -1,7 +1,4 @@
 #This scirps is desingd to keed Wireguard VPN tunnel up and running on my windows computers!
-#This needs to tun with highest privilages.
-
-#Check if service status is running.
 
 $mypath = $MyInvocation.MyCommand.Path
 $mypath = Split-Path $mypath -Parent
