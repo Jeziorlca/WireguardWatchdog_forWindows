@@ -3,18 +3,18 @@
 
 #Check if service status is running.
 
+$mypath = $MyInvocation.MyCommand.Path
+$mypath = Split-Path $mypath -Parent
 $hostname = (Get-WmiObject -Class Win32_ComputerSystem).Name
 $serviceName = "wireguardtunnel`$$hostname`_Wireguard"
 $logfile = "c:\wireguard_watchdog.log"
 $wireguardexe = 'C:\Program Files\WireGuard\wireguard.exe'
-$wireguardconf = "Path_to_config_files\$hostname`_Wireguard.conf"
-Write-Output $wireguardconf
-
+$wireguardconf = "$mypath\tunnels\$hostname`_Wireguard.conf"
 
 #check if logfile exists
 if (!(Test-Path $logfile)) {
     New-Item $logfile > $null
-    Write-Output "$(get-date) logfile created" | Out-File $logfile
+    Write-Output "$(get-date) logfile created" | Out-File $logfile -Append
 }
 
 # Check if Wireguard.exe is running (Only if you want to have GUI on).
@@ -45,7 +45,6 @@ if (Get-Service -Name $serviceName -ErrorAction SilentlyContinue) {
 } else {
     Write-Output "$(get-date) Service $servicename does not exist. Starting" | Out-File $logfile -append
     Start-process -FilePath $wireguardexe -ArgumentList '/installtunnelservice', $wireguardconf -NoNewWindow -passThru -Wait | Out-Null
-    #start-process 'C:\Program Files\WireGuard\wireguard.exe' -ArgumentList '/installtunnelservice', 'C:\Users\jezio\Code\WireguardWatchdog_forWindows\tunnels\JEZIORGRAM_Wireguard.conf' -NoNewWindow -passThru -Wait
     Write-Output "$(get-date) Service $servicename started. Alles OK." | Out-File $logfile -append #assume that it works with no error for now
 }
 
