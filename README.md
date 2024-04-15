@@ -6,8 +6,8 @@ I have run into problems where the Wireguard VPN is not up and running or stopps
 ## How to use this script
 
 This script is intended to run as a scheduled task to keep Wireguard VPN up and running.
+It will look for a config file in the given path, which name is based on the hostname.
 
 ## ToDo:
 
-- Add error handling
-- Add handling of config files based on the hostname
+- additional error handling

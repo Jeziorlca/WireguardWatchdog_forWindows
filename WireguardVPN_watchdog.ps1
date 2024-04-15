@@ -3,11 +3,12 @@
 
 #Check if service status is running.
 
-$serviceName = 'WireGuardTunnel$tunnel_name'
+$hostname = (Get-WmiObject -Class Win32_ComputerSystem).Name
+$serviceName = "wireguardtunnel`$$hostname`_Wireguard"
 $logfile = "c:\wireguard_watchdog.log"
 $wireguardexe = 'C:\Program Files\WireGuard\wireguard.exe'
-#need to get the config file from wireguard.exe, manually for now.
-$wireguardconf = './tunnel_Wireguard.conf'
+$wireguardconf = "Path_to_config_files\$hostname`_Wireguard.conf"
+Write-Output $wireguardconf
 
 
 #check if logfile exists
@@ -16,7 +17,7 @@ if (!(Test-Path $logfile)) {
     Write-Output "$(get-date) logfile created" | Out-File $logfile
 }
 
-# Check if Wireguard is running
+# Check if Wireguard.exe is running (Only if you want to have GUI on).
 $process = Get-Process -Name "wireguard" -ErrorAction SilentlyContinue
 if ($process) {
     Write-Output "$(get-date) Wireguard.exe is running. Alles OK." | Out-File $logfile -append
@@ -43,19 +44,16 @@ if (Get-Service -Name $serviceName -ErrorAction SilentlyContinue) {
     Write-Output "$(get-date) Service $servicename exists. Alles OK." | Out-File $logfile -append
 } else {
     Write-Output "$(get-date) Service $servicename does not exist. Starting" | Out-File $logfile -append
-    Start-process -FilePath $wireguardexe -ArgumentList '/installtunnelservice', "C:\users\jezio\tunnel_Wireguard.conf" -NoNewWindow -passThru -Wait | Out-null
+    Start-process -FilePath $wireguardexe -ArgumentList '/installtunnelservice', $wireguardconf -NoNewWindow -passThru -Wait | Out-Null
+    #start-process 'C:\Program Files\WireGuard\wireguard.exe' -ArgumentList '/installtunnelservice', 'C:\Users\jezio\Code\WireguardWatchdog_forWindows\tunnels\JEZIORGRAM_Wireguard.conf' -NoNewWindow -passThru -Wait
     Write-Output "$(get-date) Service $servicename started. Alles OK." | Out-File $logfile -append #assume that it works with no error for now
 }
-
 
 function startservice {
 
     param (
     $servicename
     )
-    #check if service is exists
-    $service = Get-Service -Name $serviceName -ErrorAction SilentlyContinue
-    
     $serviceStatus = (Get-Service -Name $serviceName).Status
     
     switch ($serviceStatus) {
@@ -79,5 +77,4 @@ function startservice {
     }
 }
 
-startservice('WireGuardManager')
-startservice('wireguardtunnel$tunnel_Wireguard')
+startservice("wireguardtunnel`$$hostname`_Wireguard")
