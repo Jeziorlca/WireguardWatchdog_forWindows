@@ -74,3 +74,4 @@ function startservice {
 }
 
 startservice("wireguardtunnel`$$hostname`_Wireguard")
+exit 1
